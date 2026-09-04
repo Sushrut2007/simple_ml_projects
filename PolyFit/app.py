@@ -10,17 +10,19 @@ uploaded_file = st.file_uploader(
     type = 'csv'
 )
 
+
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
 
     st.dataframe(df)
 
-# Valid dataset
-is_valid = validate_dataset(df)
+    # Valid dataset
+    is_valid = validate_dataset(df)
 
-if is_valid is True:
-    st.success('Valid dataset!')
+    if is_valid is True:
+        st.success('Valid dataset!')
+    else:
+        st.warning('Invalid dataset!')
+
 else:
-    st.warning('Invalid dataset!')
-
-st.write(df.dtypes)
+    st.info('Please upload a CSV file.')
