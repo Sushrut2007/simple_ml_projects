@@ -1,16 +1,15 @@
 """
 Utility functions
-
 """
 
 import numpy as np
 import pandas as pd
-
+import streamlit as st
 
 # -----------------------------
 # Data loading
 #------------------------------
-
+@st.cache_data()
 def load_dataset(filename):
     """
     Loads a CSV file into a dataframe.
@@ -23,7 +22,7 @@ def load_dataset(filename):
 # -----------------------------
 # Dataset validation
 #------------------------------
-
+@st.cache_data()
 def validate_dataset(df):
     """
     Validate the dataset against the requirements of Polynomial Regression.
