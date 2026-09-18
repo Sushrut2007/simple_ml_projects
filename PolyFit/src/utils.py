@@ -5,6 +5,7 @@ Utility functions
 import numpy as np
 import pandas as pd
 import streamlit as st
+import hashlib
 
 # -----------------------------
 # Data loading
@@ -45,3 +46,18 @@ def validate_dataset(df):
         return "Please use a valid dataset!"
     
     return True
+
+
+# -----------------------------
+# File hashing
+#------------------------------
+@st.cache_data
+def get_file_hash(file):
+    """
+    Get the hash of a csv file.
+    """ 
+
+    file_bytes = file.getvalue()
+    current_hash = hashlib.md5(file_bytes).hexdigest()
+
+    return current_hash
