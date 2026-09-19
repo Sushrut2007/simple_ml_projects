@@ -49,5 +49,46 @@ def convert_to_poly_features(X_train, X_test, current_degree):
     return X_train_poly, X_test_poly
 
 
+def poly_fit(data, N):
+    """
+    Train and evaluate polynomial regression models for multiple degrees.
+
+    The function unpacks the training and testing data, then trains one
+    polynomial regression model for each degree from 1 through N. Each model
+    is evaluated using the test data and its error metrics are calculated.
+
+    Returns results including degree and associated errors
+    """
+
+    results = []
+    X_train, X_test, y_train, y_test = data
+
+    # Loop through each degree from 1 to N
+    for degree in range(1, N+1):
+        # Convert features into poly features
+        X_train_poly, X_test_poly = convert_to_poly_features(X_train, X_test, degree)
+
+        # Create model 
+        model = LinearRegression()
+
+        # Train and test the dataset
+        model.fit(X_train_poly, y_train)
+
+        y_pred = model.predict(X_test_poly)
+
+        # Calculate MAE, RMSE, R2-score
+        mae = mean_absolute_error(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        r2_score = r2_score(y_test, y_pred)
+
+        # Store the results for the current degree
+        results.append({
+            'degree': degree,
+            'mae': mae,
+            'rmse': rmse,
+            'r2_score': r2_score
+        })
+
+    return results
 
 
