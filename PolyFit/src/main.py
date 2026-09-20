@@ -30,6 +30,7 @@ def perform_train_test_split(df, target):
     return X_train, X_test, y_train, y_test
 
 
+@st.cache_data(show_spinner='Converting features...')
 def convert_to_poly_features(X_train, X_test, current_degree):
     """
     Transform training and testing features into polynomial features.
@@ -49,6 +50,7 @@ def convert_to_poly_features(X_train, X_test, current_degree):
     return X_train_poly, X_test_poly
 
 
+@st.cache_data(show_spinner='Training and testing models....')
 def poly_fit(data, N):
     """
     Train and evaluate polynomial regression models for multiple degrees.
@@ -57,7 +59,7 @@ def poly_fit(data, N):
     polynomial regression model for each degree from 1 through N. Each model
     is evaluated using the test data and its error metrics are calculated.
 
-    Returns results including degree and associated errors
+    Returns results including degree and associated errors in the form of dictionary.
     """
 
     results = []
@@ -79,16 +81,47 @@ def poly_fit(data, N):
         # Calculate MAE, RMSE, R2-score
         mae = mean_absolute_error(y_test, y_pred)
         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-        r2_score = r2_score(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
 
         # Store the results for the current degree
         results.append({
             'degree': degree,
             'mae': mae,
             'rmse': rmse,
-            'r2_score': r2_score
+            'r2_score': r2
         })
 
     return results
 
 
+#---------------------
+# Polynomial degree evaluation
+#---------------------
+
+@st.cache_data(show_spinner="Finding the best degree...")
+def find_best_degree(degree_result, tolerance):
+    """
+    Finds the best degree based on RMSE and provided tolerance.
+    
+    The function finds the maximum acceptable rmse using tolerane.
+    Formula: maximum acceptable rmse = minimum rmse * (1 + tolerance% / 100)
+
+    The next possible best degree will have lesser complexity while having MORE rmse.
+    """
+
+    # Sort degree results from lowest to highest rmse
+    sorted_degree_result = sorted(degree_result, key=lambda x: x['rmse'])
+    # Get the degree with the lowest rmse
+    best_degree = sorted_degree_result[0]
+
+    # Apply the formula and find degree with tolerable rmse (if any)
+    max_acceptable_rmse = best_degree['rmse'] * (1 + tolerance / 100)
+
+    acceptable_degrees = sorted(
+        (d for d in sorted_degree_result
+         if d['degree'] < best_degree['degree']
+         and d['rmse'] <= max_acceptable_rmse),
+        key=lambda d: d['rmse']
+    )
+
+    return best_degree, acceptable_degrees
