@@ -80,7 +80,7 @@ def poly_fit(data, N):
 
         # Calculate MAE, RMSE, R2-score
         mae = mean_absolute_error(y_test, y_pred)
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        rmse = round(np.sqrt(mean_squared_error(y_test, y_pred)), 4)
         r2 = r2_score(y_test, y_pred)
 
         # Store the results for the current degree
