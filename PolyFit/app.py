@@ -1,6 +1,6 @@
 import streamlit as st
-import hashlib
 from src.utils import *
+from src.main import *
 
 # Initialize session states
 if 'model_settings' not in st.session_state:
@@ -45,7 +45,7 @@ def has_saved_settings(uploaded_file):
     current_hash = get_file_hash(uploaded_file)
 
     # Set as the current file hash
-    st.session_state['model_settings']['current_hash'] = current_hash
+    st.session_state['model_settings']['current_file_hash'] = current_hash
 
     # Check if current file settings were saved previously
     is_saved = current_hash in st.session_state['model_settings']['saved_settings_by_file']
@@ -98,6 +98,10 @@ def set_model_settings():
             return settings, save_settings
         return None
 
+
+# -------------------------
+# Dataset uploading and choosing hyper-parameters
+# -------------------------
 
 # Dataset uploader
 uploaded_file = st.file_uploader(
@@ -159,9 +163,37 @@ if uploaded_file:
             st.warning('Invalid dataset!')
             st.stop()
 
+
+    # -------------------------
+    # Model training and testing 
+    # -------------------------
+    target = st.session_state['model_settings']['current_settings']['target']
+    max_degree = st.session_state['model_settings']['current_settings']['max_degree']
+    tolerance = st.session_state['model_settings']['current_settings']['tolerance']
+
+    if target is None or max_degree is None or tolerance is None:
+        st.info('Please submit the form to analyze the results')
+        st.stop()
+        
+    # Split the dataset
+    X_train, X_test, y_train, y_test = perform_train_test_split(df, target)
+
+    # Run poly fit pipeline
+    result = poly_fit((X_train, X_test, y_train, y_test), max_degree)
+
+    # -------------------------
+    # Finding best degrees based on rmse and tolerance
+    # -------------------------
+    st.divider()
+    best_degree, acceptable_degree = find_best_degree(result, tolerance)
+    st.write(best_degree)
+
+    st.write(acceptable_degree)
+    
+
 else:
     st.info('Please upload a CSV file before you can move further.')
     st.stop()
 
 
-st.write(st.session_state)
+st.divider()
